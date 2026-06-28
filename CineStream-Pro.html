@@ -206,6 +206,38 @@ nav{padding:0 12px;gap:8px}
 .guard-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 .guard-text{font-size:13px;color:var(--muted)}
 
+/* FEATURED COLLECTIONS */
+.collection-tabs{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.collection-tab{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 16px;border-radius:20px;cursor:pointer;transition:all .2s}
+.collection-tab:hover{border-color:var(--accent);color:var(--accent)}
+.collection-tab.active{background:var(--accent);border-color:var(--accent);color:#111}
+
+/* MOVIE OF THE DAY */
+.motd-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;gap:0;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative}
+.motd-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.motd-poster{width:100px;flex-shrink:0;object-fit:cover;display:block}
+.motd-poster-ph{width:100px;flex-shrink:0;background:var(--card);display:flex;align-items:center;justify-content:center;font-size:32px}
+.motd-info{padding:16px;flex:1}
+.motd-badge{background:var(--accent);color:#111;font-size:9px;font-weight:700;letter-spacing:1px;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.motd-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:6px;line-height:1.1}
+.motd-meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+.motd-overview{font-size:12px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.motd-play{margin-top:12px;background:var(--accent);color:#111;border:none;font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;padding:8px 18px;border-radius:6px;cursor:pointer}
+
+/* COUNTDOWN TIMER */
+.countdown-section{background:linear-gradient(135deg,rgba(232,184,75,.08),rgba(232,184,75,.02));border:1px solid rgba(232,184,75,.2);border-radius:14px;padding:20px 24px;margin-bottom:8px}
+.countdown-movie{display:flex;align-items:center;gap:14px;margin-bottom:16px;cursor:pointer}
+.countdown-thumb{width:52px;height:78px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.countdown-thumb-ph{width:52px;height:78px;background:var(--card);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.countdown-movie-info{flex:1}
+.countdown-movie-title{font-weight:600;font-size:14px;margin-bottom:4px}
+.countdown-movie-date{font-size:12px;color:var(--muted)}
+.countdown-label{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:10px}
+.countdown-timer{display:flex;gap:10px}
+.countdown-unit{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;min-width:52px}
+.countdown-num{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--accent);line-height:1;display:block}
+.countdown-text{font-size:9px;color:var(--muted);font-weight:600;letter-spacing:.5px}
+
 /* PROFILE MODAL */
 #profileModal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.85);backdrop-filter:blur(12px)}
 #profileModal.open{display:flex;animation:fadeIn .3s ease}
@@ -328,6 +360,34 @@ body{padding-bottom:68px}
   <div id="homeSection">
     <div class="section" id="continueSection" style="display:none"><div class="section-header"><h2 class="section-title">CONTINUE <span>WATCHING</span></h2><button class="see-all" onclick="showSection('watchlist')">My List →</button></div><div class="card-row" id="continueRow"></div></div>
     <div class="section" id="watchlistSection" style="display:none"><div class="section-header"><h2 class="section-title">MY <span>WATCHLIST</span></h2><button class="see-all" onclick="showSection('watchlist')">See All →</button></div><div class="card-row" id="watchlistRow"></div></div>
+    <!-- MOVIE OF THE DAY -->
+    <div class="section" id="motdSection">
+      <div class="section-header"><h2 class="section-title">🎬 MOVIE OF THE <span>DAY</span></h2></div>
+      <div id="motdCard"></div>
+    </div>
+
+    <!-- COUNTDOWN TIMER -->
+    <div class="section" id="countdownSection">
+      <div class="section-header"><h2 class="section-title">⏳ COMING <span>SOON</span></h2></div>
+      <div class="countdown-section">
+        <div class="countdown-label">NEXT BIG RELEASE</div>
+        <div class="countdown-movie" id="countdownMovie"></div>
+        <div class="countdown-timer">
+          <div class="countdown-unit"><span class="countdown-num" id="cdDays">00</span><span class="countdown-text">DAYS</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cdHours">00</span><span class="countdown-text">HRS</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cdMins">00</span><span class="countdown-text">MINS</span></div>
+          <div class="countdown-unit"><span class="countdown-num" id="cdSecs">00</span><span class="countdown-text">SECS</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEATURED COLLECTIONS -->
+    <div class="section" id="collectionsSection">
+      <div class="section-header"><h2 class="section-title">✨ FEATURED <span>COLLECTIONS</span></h2></div>
+      <div class="collection-tabs" id="collectionTabs"></div>
+      <div class="card-row" id="collectionRow"></div>
+    </div>
+
     <div class="section"><div class="section-header"><h2 class="section-title">TRENDING <span>MOVIES</span></h2><button class="see-all" onclick="showSection('movies')">See All →</button></div><div class="card-row" id="trendingMovies"></div></div>
     <div class="section"><div class="section-header"><h2 class="section-title">POPULAR <span>SERIES</span></h2><button class="see-all" onclick="showSection('series')">See All →</button></div><div class="card-row" id="popularSeries"></div></div>
     <div class="section"><div class="section-header"><h2 class="section-title">TOP <span>RATED</span></h2></div><div class="card-row" id="topRated"></div></div>
@@ -671,7 +731,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
 function saveApiKey(){const k=document.getElementById('apiKeyInput').value.trim();if(!k){showToast('Enter a valid key');return;}KEY=k;localStorage.setItem('cs_key',k);document.getElementById('apiBanner').classList.add('hidden');initApp();}
 
-async function initApp(){document.getElementById('mainContent').style.display='block';await loadWatchlistCache();loadHero();loadContinueWatching();loadWatchlistRow();loadRow('/trending/movie/week','trendingMovies','movie');loadRow('/tv/popular','popularSeries','tv');loadRow('/movie/top_rated','topRated','movie');loadRow('/movie/now_playing','nowPlaying','movie');loadMovieGenres();loadTVGenres();}
+async function initApp(){document.getElementById('mainContent').style.display='block';await loadWatchlistCache();loadHero();loadMotd();loadCountdown();loadCollections();loadContinueWatching();loadWatchlistRow();loadRow('/trending/movie/week','trendingMovies','movie');loadRow('/tv/popular','popularSeries','tv');loadRow('/movie/top_rated','topRated','movie');loadRow('/movie/now_playing','nowPlaying','movie');loadMovieGenres();loadTVGenres();}
 
 async function tmdb(ep,p={}){const u=new URL(TMDB+ep);u.searchParams.set('api_key',KEY);Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);if(!r.ok){if(r.status===401){showToast('Invalid API key');document.getElementById('apiBanner').classList.remove('hidden');document.getElementById('mainContent').style.display='none';}throw new Error(r.status);}return r.json();}
 
@@ -810,6 +870,112 @@ async function loadWatchlistPage() {
   }
 }
 
+// ── MOVIE OF THE DAY ──
+async function loadMotd() {
+  try {
+    const today = new Date();
+    const seed = today.getFullYear() * 10000 + (today.getMonth()+1) * 100 + today.getDate();
+    const page = (seed % 5) + 1;
+    const d = await tmdb(`/movie/top_rated?page=${page}`);
+    const idx = seed % d.results.length;
+    const item = d.results[idx];
+    const el = document.getElementById('motdCard');
+    const thumb = item.poster_path
+      ? `<img class="motd-poster" src="${IMG}w185${item.poster_path}" alt="${item.title}"/>`
+      : `<div class="motd-poster-ph">🎬</div>`;
+    el.innerHTML = `<div class="motd-card" onclick="openDetail(motdItem,'movie')">
+      ${thumb}
+      <div class="motd-info">
+        <div class="motd-badge">⭐ TODAY'S PICK</div>
+        <div class="motd-title">${item.title}</div>
+        <div class="motd-meta">★ ${item.vote_average.toFixed(1)} · ${(item.release_date||'').slice(0,4)}</div>
+        <div class="motd-overview">${item.overview||''}</div>
+        <button class="motd-play" onclick="event.stopPropagation();openPlayer(motdItem,'movie')">▶ Watch Now</button>
+      </div>
+    </div>`;
+    window.motdItem = item;
+  } catch(e) { document.getElementById('motdSection').style.display='none'; }
+}
+
+// ── COUNTDOWN TIMER ──
+let countdownItem = null;
+let countdownInterval = null;
+
+async function loadCountdown() {
+  try {
+    const d = await tmdb('/movie/upcoming');
+    const upcoming = (d.results||[]).filter(m => m.release_date && new Date(m.release_date) > new Date());
+    if (!upcoming.length) { document.getElementById('countdownSection').style.display='none'; return; }
+    upcoming.sort((a,b) => new Date(a.release_date) - new Date(b.release_date));
+    countdownItem = upcoming[0];
+    const el = document.getElementById('countdownMovie');
+    const thumb = countdownItem.poster_path
+      ? `<img class="countdown-thumb" src="${IMG}w185${countdownItem.poster_path}" alt="${countdownItem.title}"/>`
+      : `<div class="countdown-thumb-ph">🎬</div>`;
+    el.innerHTML = `${thumb}<div class="countdown-movie-info"><div class="countdown-movie-title">${countdownItem.title}</div><div class="countdown-movie-date">📅 ${countdownItem.release_date}</div></div>`;
+    el.onclick = () => openDetail(countdownItem, 'movie');
+    startCountdown(new Date(countdownItem.release_date));
+  } catch(e) { document.getElementById('countdownSection').style.display='none'; }
+}
+
+function startCountdown(releaseDate) {
+  if (countdownInterval) clearInterval(countdownInterval);
+  function tick() {
+    const now = new Date();
+    const diff = releaseDate - now;
+    if (diff <= 0) { clearInterval(countdownInterval); return; }
+    const days = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins = Math.floor((diff % 3600000) / 60000);
+    const secs = Math.floor((diff % 60000) / 1000);
+    document.getElementById('cdDays').textContent = String(days).padStart(2,'0');
+    document.getElementById('cdHours').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cdMins').textContent = String(mins).padStart(2,'0');
+    document.getElementById('cdSecs').textContent = String(secs).padStart(2,'0');
+  }
+  tick();
+  countdownInterval = setInterval(tick, 1000);
+}
+
+// ── FEATURED COLLECTIONS ──
+const COLLECTIONS = [
+  { label: '🏆 Oscar Winners', url: '/movie/top_rated', type: 'movie' },
+  { label: '🔥 Best of 2025', url: '/discover/movie?primary_release_year=2025&sort_by=vote_average.desc&vote_count.gte=100', type: 'movie' },
+  { label: '💎 Hidden Gems', url: '/discover/movie?vote_average.gte=7&vote_count.lte=500&vote_count.gte=50&sort_by=vote_average.desc', type: 'movie' },
+  { label: '😂 Comedy Gold', url: '/discover/movie?with_genres=35&sort_by=popularity.desc', type: 'movie' },
+  { label: '👻 Horror Classics', url: '/discover/movie?with_genres=27&sort_by=vote_average.desc&vote_count.gte=200', type: 'movie' },
+  { label: '🚀 Sci-Fi Epics', url: '/discover/movie?with_genres=878&sort_by=vote_average.desc&vote_count.gte=200', type: 'movie' },
+  { label: '📺 Top TV Shows', url: '/tv/top_rated', type: 'tv' },
+  { label: '🌍 World Cinema', url: '/discover/movie?with_original_language=ko|ja|fr|es&sort_by=vote_average.desc&vote_count.gte=100', type: 'movie' },
+];
+
+async function loadCollections() {
+  const tabs = document.getElementById('collectionTabs');
+  tabs.innerHTML = '';
+  COLLECTIONS.forEach((col, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'collection-tab' + (i===0?' active':'');
+    btn.textContent = col.label;
+    btn.onclick = () => {
+      document.querySelectorAll('.collection-tab').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadCollectionRow(col);
+    };
+    tabs.appendChild(btn);
+  });
+  loadCollectionRow(COLLECTIONS[0]);
+}
+
+async function loadCollectionRow(col) {
+  const row = document.getElementById('collectionRow');
+  row.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Loading...</div>';
+  try {
+    const d = await tmdb(col.url);
+    row.innerHTML = '';
+    (d.results||[]).slice(0,20).forEach(item => row.appendChild(mkCard(item, col.type)));
+  } catch(e) { row.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:8px">Failed to load</div>'; }
+}
+
 function showSection(name){['homeSection','moviesSection','seriesSection','trendingSection'].forEach(s=>document.getElementById(s).style.display='none');
   document.getElementById('searchPage').classList.remove('active');
   document.getElementById('watchlistPage').style.display='none';
@@ -917,4 +1083,3 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 </div>
 </body>
 </html>
-nx
