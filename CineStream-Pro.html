@@ -203,6 +203,17 @@ nav{padding:0 12px;gap:8px}
 #sessionGuard.hidden{display:none}
 .guard-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 .guard-text{font-size:13px;color:var(--muted)}
+
+/* MOBILE BOTTOM NAV */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(6,8,13,.97);border-top:1px solid var(--border);backdrop-filter:blur(14px);padding:8px 0 12px}
+.mobile-nav-inner{display:flex;justify-content:space-around;align-items:center}
+.mobile-nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;cursor:pointer;padding:4px 10px;border-radius:8px;transition:all .2s;min-width:52px}
+.mobile-nav-btn .mn-icon{font-size:18px;line-height:1}
+.mobile-nav-btn.active,.mobile-nav-btn:hover{color:var(--accent)}
+@media(max-width:700px){
+.mobile-nav{display:block}
+body{padding-bottom:68px}
+}
 </style>
 </head>
 <body>
@@ -487,6 +498,11 @@ function applyUser(user) {
   if (ddEmail) ddEmail.textContent = email;
 }
 
+function setMobileNav(btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 function toggleDropdown() {
   document.getElementById('userDropdown').classList.toggle('open');
 }
@@ -706,5 +722,25 @@ async function handleSearch(e){const q=e.target.value.trim();if(!q){document.get
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 </script>
+<!-- MOBILE BOTTOM NAV -->
+<div class="mobile-nav">
+  <div class="mobile-nav-inner">
+    <button class="mobile-nav-btn active" id="mnHome" onclick="showSection('home');setMobileNav(this)">
+      <span class="mn-icon">🏠</span>Home
+    </button>
+    <button class="mobile-nav-btn" id="mnMovies" onclick="showSection('movies');setMobileNav(this)">
+      <span class="mn-icon">🎬</span>Movies
+    </button>
+    <button class="mobile-nav-btn" id="mnSeries" onclick="showSection('series');setMobileNav(this)">
+      <span class="mn-icon">📺</span>Series
+    </button>
+    <button class="mobile-nav-btn" id="mnTrending" onclick="showSection('trending');setMobileNav(this)">
+      <span class="mn-icon">🔥</span>Trending
+    </button>
+    <button class="mobile-nav-btn" id="mnList" onclick="showSection('watchlist');setMobileNav(this)">
+      <span class="mn-icon">❤️</span>My List
+    </button>
+  </div>
+</div>
 </body>
 </html>
