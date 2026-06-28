@@ -144,7 +144,20 @@ footer{text-align:center;padding:28px 36px;border-top:1px solid var(--border);co
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-@media(max-width:900px){.player-sidebar{display:none}}
+@media(max-width:900px){
+.player-body{flex-direction:column}
+.player-sidebar{width:100%;border-left:none;border-top:1px solid var(--border);max-height:280px}
+.player-frame-wrap{min-height:240px}
+}
+@media(max-width:600px){
+.player-header{padding:10px 14px}
+.player-title{font-size:16px}
+.player-controls{padding:8px 10px;gap:5px}
+.server-btn{font-size:10px;padding:4px 9px}
+.player-sidebar{max-height:220px}
+.ep-card{padding:7px}
+.ep-thumb,.ep-thumb-ph{width:56px}
+}
 @media(max-width:700px){
 nav{padding:0 12px;gap:8px}
 .nav-links{display:none}
