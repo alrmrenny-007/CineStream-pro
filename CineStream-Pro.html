@@ -204,6 +204,28 @@ nav{padding:0 12px;gap:8px}
 .guard-spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
 .guard-text{font-size:13px;color:var(--muted)}
 
+/* PROFILE MODAL */
+#profileModal{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.85);backdrop-filter:blur(12px)}
+#profileModal.open{display:flex;animation:fadeIn .3s ease}
+.profile-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:420px;padding:28px;position:relative;animation:slideUp .3s ease}
+.profile-close{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--text);width:30px;height:30px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px}
+.profile-close:hover{background:var(--accent2)}
+.profile-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
+.profile-avatar-big{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;font-family:'DM Sans',sans-serif;color:#111;border:3px solid var(--border);cursor:pointer;position:relative;overflow:hidden;transition:all .2s}
+.profile-avatar-big:hover::after{content:'📷';position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;font-size:24px}
+.profile-avatar-img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.color-picker{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.color-dot:hover,.color-dot.active{border-color:#fff;transform:scale(1.15)}
+.profile-field{margin-bottom:16px}
+.profile-label{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.5px;margin-bottom:6px;display:block}
+.profile-input{width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 14px;border-radius:8px;outline:none;transition:border-color .2s}
+.profile-input:focus{border-color:var(--accent)}
+.profile-save{width:100%;background:var(--accent);color:#111;border:none;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;padding:12px;border-radius:8px;cursor:pointer;transition:all .2s;margin-top:4px}
+.profile-save:hover{background:#f0c85a}
+.profile-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px;text-align:center}
+.profile-subtitle{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px}
+
 /* MOBILE BOTTOM NAV */
 .mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;background:rgba(6,8,13,.97);border-top:1px solid var(--border);backdrop-filter:blur(14px);padding:8px 0 12px}
 .mobile-nav-inner{display:flex;justify-content:space-around;align-items:center}
@@ -244,6 +266,7 @@ body{padding-bottom:68px}
           <div class="user-dropdown-name" id="ddName">User</div>
           <div class="user-dropdown-email" id="ddEmail"></div>
         </div>
+        <button class="dd-item" onclick="openProfile();toggleDropdown()">👤 Edit Profile</button>
         <button class="dd-item" onclick="showSection('home');toggleDropdown()">🏠 Home</button>
         <button class="dd-item" onclick="showSection('movies');toggleDropdown()">🎬 Movies</button>
         <button class="dd-item" onclick="showSection('series');toggleDropdown()">📺 Series</button>
@@ -498,6 +521,111 @@ function applyUser(user) {
   if (ddEmail) ddEmail.textContent = email;
 }
 
+// ── PROFILE ──
+let profileAvatarColor = '#e8b84b';
+let profileAvatarUrl = null;
+
+async function openProfile() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const { data: { session } } = await db.auth.getSession();
+  const user = session.user;
+
+  // Load profile from Supabase
+  const { data: profile } = await db.from('profiles').select('*').eq('id', uid).single();
+
+  const name = profile?.display_name || user.user_metadata?.full_name || '';
+  const email = user.email || '';
+  const color = profile?.avatar_color || '#e8b84b';
+  const avatarUrl = profile?.avatar_url || null;
+
+  document.getElementById('profileName').value = name;
+  document.getElementById('profileEmail').value = email;
+  profileAvatarColor = color;
+  profileAvatarUrl = avatarUrl;
+
+  // Set avatar display
+  const big = document.getElementById('profileAvatarBig');
+  if (avatarUrl) {
+    big.innerHTML = `<img class="profile-avatar-img" src="${avatarUrl}" alt="avatar"/>`;
+  } else {
+    big.style.background = color;
+    big.innerHTML = `<span id="profileAvatarLetter">${(name||email).charAt(0).toUpperCase()}</span>`;
+  }
+
+  // Set active color dot
+  document.querySelectorAll('.color-dot').forEach(d => {
+    d.classList.toggle('active', d.style.background === color);
+  });
+
+  document.getElementById('profileModal').classList.add('open');
+}
+
+function closeProfile() {
+  document.getElementById('profileModal').classList.remove('open');
+}
+
+function setAvatarColor(color, dot) {
+  profileAvatarColor = color;
+  profileAvatarUrl = null;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  dot.classList.add('active');
+  const big = document.getElementById('profileAvatarBig');
+  big.style.background = color;
+  const name = document.getElementById('profileName').value;
+  const letter = (name || 'U').charAt(0).toUpperCase();
+  big.innerHTML = `<span id="profileAvatarLetter">${letter}</span>`;
+}
+
+async function handleAvatarUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('Image must be under 2MB'); return; }
+  const uid = await getUserId();
+  const ext = file.name.split('.').pop();
+  const path = `avatars/${uid}.${ext}`;
+  const { error } = await db.storage.from('avatars').upload(path, file, { upsert: true });
+  if (error) { showToast('Upload failed — check Supabase storage'); return; }
+  const { data } = db.storage.from('avatars').getPublicUrl(path);
+  profileAvatarUrl = data.publicUrl;
+  const big = document.getElementById('profileAvatarBig');
+  big.innerHTML = `<img class="profile-avatar-img" src="${profileAvatarUrl}" alt="avatar"/>`;
+  showToast('Photo uploaded!');
+}
+
+async function saveProfile() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const name = document.getElementById('profileName').value.trim();
+  if (!name) { showToast('Please enter a display name'); return; }
+
+  const { error } = await db.from('profiles').upsert({
+    id: uid, display_name: name,
+    avatar_color: profileAvatarColor,
+    avatar_url: profileAvatarUrl,
+    updated_at: new Date().toISOString()
+  });
+
+  if (error) { showToast('Failed to save — try again'); return; }
+
+  // Update nav avatar
+  const btn = document.getElementById('userAvatarBtn');
+  const ddName = document.getElementById('ddName');
+  if (ddName) ddName.textContent = name;
+  if (btn) {
+    if (profileAvatarUrl) {
+      btn.innerHTML = `<img src="${profileAvatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" alt="avatar"/>`;
+      btn.style.padding = '0';
+    } else {
+      btn.textContent = name.charAt(0).toUpperCase();
+      btn.style.background = profileAvatarColor;
+    }
+  }
+
+  showToast('✓ Profile saved!');
+  closeProfile();
+}
+
 function setMobileNav(btn) {
   document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
@@ -528,7 +656,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('apiBanner').classList.add('hidden');initApp();
   document.getElementById('searchInput').addEventListener('input',debounce(handleSearch,500));
   document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))closeDetail();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePlayer();closeDetail();}if(e.key==='/'&&document.activeElement!==document.getElementById('searchInput')){e.preventDefault();document.getElementById('searchInput').focus();}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePlayer();closeDetail();closeProfile();}if(e.key==='/'&&document.activeElement!==document.getElementById('searchInput')){e.preventDefault();document.getElementById('searchInput').focus();}});
 });
 
 function saveApiKey(){const k=document.getElementById('apiKeyInput').value.trim();if(!k){showToast('Enter a valid key');return;}KEY=k;localStorage.setItem('cs_key',k);document.getElementById('apiBanner').classList.add('hidden');initApp();}
@@ -722,6 +850,41 @@ async function handleSearch(e){const q=e.target.value.trim();if(!q){document.get
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
 </script>
+<!-- PROFILE MODAL -->
+<div id="profileModal">
+  <div class="profile-box">
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+    <div class="profile-title">EDIT <span style="color:var(--accent)">PROFILE</span></div>
+    <div class="profile-subtitle">Customize how you appear on CineStream</div>
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar-big" id="profileAvatarBig" onclick="document.getElementById('avatarUpload').click()">
+        <span id="profileAvatarLetter">A</span>
+      </div>
+      <input type="file" id="avatarUpload" accept="image/*" style="display:none" onchange="handleAvatarUpload(this)"/>
+      <p style="font-size:11px;color:var(--muted)">Tap to upload photo</p>
+      <div class="color-picker" id="colorPicker">
+        <div class="color-dot active" style="background:#e8b84b" onclick="setAvatarColor('#e8b84b',this)"></div>
+        <div class="color-dot" style="background:#e74c3c" onclick="setAvatarColor('#e74c3c',this)"></div>
+        <div class="color-dot" style="background:#2ecc71" onclick="setAvatarColor('#2ecc71',this)"></div>
+        <div class="color-dot" style="background:#3498db" onclick="setAvatarColor('#3498db',this)"></div>
+        <div class="color-dot" style="background:#9b59b6" onclick="setAvatarColor('#9b59b6',this)"></div>
+        <div class="color-dot" style="background:#e67e22" onclick="setAvatarColor('#e67e22',this)"></div>
+        <div class="color-dot" style="background:#1abc9c" onclick="setAvatarColor('#1abc9c',this)"></div>
+        <div class="color-dot" style="background:#e91e63" onclick="setAvatarColor('#e91e63',this)"></div>
+      </div>
+    </div>
+    <div class="profile-field">
+      <label class="profile-label">DISPLAY NAME</label>
+      <input type="text" class="profile-input" id="profileName" placeholder="Enter your name..." maxlength="30"/>
+    </div>
+    <div class="profile-field">
+      <label class="profile-label">EMAIL</label>
+      <input type="text" class="profile-input" id="profileEmail" disabled style="opacity:.5"/>
+    </div>
+    <button class="profile-save" onclick="saveProfile()">Save Changes</button>
+  </div>
+</div>
+
 <!-- MOBILE BOTTOM NAV -->
 <div class="mobile-nav">
   <div class="mobile-nav-inner">
