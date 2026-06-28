@@ -172,6 +172,20 @@ nav{padding:0 12px;gap:8px}
 .logo{font-size:20px;letter-spacing:1px}
 }
 
+/* WATCHLIST & HISTORY */
+.wl-btn{position:absolute;top:7px;left:7px;width:28px;height:28px;border-radius:50%;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s;z-index:2;background:rgba(6,8,13,.85)}
+.wl-btn.in-list{background:var(--accent);color:#111}
+.wl-btn:not(.in-list){background:rgba(6,8,13,.85);color:#fff}
+.continue-card{flex-shrink:0;width:200px;cursor:pointer;position:relative}
+.continue-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r);background:var(--surface);border:1px solid var(--border);display:block}
+.continue-thumb-ph{width:100%;aspect-ratio:16/9;border-radius:var(--r);background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px}
+.continue-progress{height:3px;background:var(--border);border-radius:2px;margin-top:6px}
+.continue-progress-bar{height:100%;background:var(--accent);border-radius:2px}
+.continue-info{margin-top:6px}.continue-title{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.continue-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.continue-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;background:rgba(232,184,75,.9);border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s}
+.continue-card:hover .continue-play{opacity:1}
+
 /* USER MENU */
 .user-menu-wrap{position:relative}
 .user-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);color:#111;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;letter-spacing:.5px}
@@ -205,6 +219,7 @@ nav{padding:0 12px;gap:8px}
     <button class="nav-btn" onclick="showSection('movies')">Movies</button>
     <button class="nav-btn" onclick="showSection('series')">Series</button>
     <button class="nav-btn" onclick="showSection('trending')">Trending</button>
+    <button class="nav-btn" onclick="showSection('watchlist')">My List</button>
   </div>
   <div style="display:flex;align-items:center;gap:10px">
     <div class="search-wrap">
@@ -221,6 +236,7 @@ nav{padding:0 12px;gap:8px}
         <button class="dd-item" onclick="showSection('home');toggleDropdown()">🏠 Home</button>
         <button class="dd-item" onclick="showSection('movies');toggleDropdown()">🎬 Movies</button>
         <button class="dd-item" onclick="showSection('series');toggleDropdown()">📺 Series</button>
+        <button class="dd-item" onclick="showSection('watchlist');toggleDropdown()">❤️ My Watchlist</button>
         <hr class="dd-divider"/>
         <button class="dd-item danger" onclick="logout()">🚪 Sign Out</button>
       </div>
@@ -266,6 +282,8 @@ nav{padding:0 12px;gap:8px}
   </section>
 
   <div id="homeSection">
+    <div class="section" id="continueSection" style="display:none"><div class="section-header"><h2 class="section-title">CONTINUE <span>WATCHING</span></h2><button class="see-all" onclick="showSection('watchlist')">My List →</button></div><div class="card-row" id="continueRow"></div></div>
+    <div class="section" id="watchlistSection" style="display:none"><div class="section-header"><h2 class="section-title">MY <span>WATCHLIST</span></h2><button class="see-all" onclick="showSection('watchlist')">See All →</button></div><div class="card-row" id="watchlistRow"></div></div>
     <div class="section"><div class="section-header"><h2 class="section-title">TRENDING <span>MOVIES</span></h2><button class="see-all" onclick="showSection('movies')">See All →</button></div><div class="card-row" id="trendingMovies"></div></div>
     <div class="section"><div class="section-header"><h2 class="section-title">POPULAR <span>SERIES</span></h2><button class="see-all" onclick="showSection('series')">See All →</button></div><div class="card-row" id="popularSeries"></div></div>
     <div class="section"><div class="section-header"><h2 class="section-title">TOP <span>RATED</span></h2></div><div class="card-row" id="topRated"></div></div>
@@ -386,6 +404,18 @@ nav{padding:0 12px;gap:8px}
   </div>
 </div>
 
+<div id="watchlistPage" style="display:none;padding:90px 36px 36px">
+  <h2 class="section-title" style="margin-bottom:6px">MY <span>WATCHLIST</span></h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:24px">Movies and series you've saved</p>
+  <div class="card-grid" id="watchlistGrid"></div>
+  <div class="empty" id="watchlistEmpty" style="display:none"><div class="icon">❤️</div><p>Your watchlist is empty.<br>Click the bookmark icon on any movie to save it.</p></div>
+
+  <h2 class="section-title" style="margin-top:40px;margin-bottom:6px">RECENTLY <span>WATCHED</span></h2>
+  <p style="font-size:13px;color:var(--muted);margin-bottom:24px">Your watch history</p>
+  <div class="card-grid" id="historyGrid"></div>
+  <div class="empty" id="historyEmpty" style="display:none"><div class="icon">🎬</div><p>No watch history yet.<br>Start watching something!</p></div>
+</div>
+
 <footer><p>© 2025 <span>CineStream Pro</span> — Powered by TMDB · Stream servers: VidSrc, 2embed, SuperEmbed & more · Data: <span>themoviedb.org</span></p></footer>
 <div id="toast"></div>
 
@@ -487,7 +517,7 @@ window.addEventListener('DOMContentLoaded', async ()=>{
 
 function saveApiKey(){const k=document.getElementById('apiKeyInput').value.trim();if(!k){showToast('Enter a valid key');return;}KEY=k;localStorage.setItem('cs_key',k);document.getElementById('apiBanner').classList.add('hidden');initApp();}
 
-async function initApp(){document.getElementById('mainContent').style.display='block';loadHero();loadRow('/trending/movie/week','trendingMovies','movie');loadRow('/tv/popular','popularSeries','tv');loadRow('/movie/top_rated','topRated','movie');loadRow('/movie/now_playing','nowPlaying','movie');loadMovieGenres();loadTVGenres();}
+async function initApp(){document.getElementById('mainContent').style.display='block';await loadWatchlistCache();loadHero();loadContinueWatching();loadWatchlistRow();loadRow('/trending/movie/week','trendingMovies','movie');loadRow('/tv/popular','popularSeries','tv');loadRow('/movie/top_rated','topRated','movie');loadRow('/movie/now_playing','nowPlaying','movie');loadMovieGenres();loadTVGenres();}
 
 async function tmdb(ep,p={}){const u=new URL(TMDB+ep);u.searchParams.set('api_key',KEY);Object.entries(p).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u);if(!r.ok){if(r.status===401){showToast('Invalid API key');document.getElementById('apiBanner').classList.remove('hidden');document.getElementById('mainContent').style.display='none';}throw new Error(r.status);}return r.json();}
 
@@ -511,17 +541,146 @@ function switchTVTab(t,btn){curTT=t;tgId=null;seriesPage=1;document.querySelecto
 async function switchTrendingTab(mt,tw,btn){document.querySelectorAll('#trendingSection .tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');gsk('trendingGrid',12);const d=await tmdb(`/trending/${mt}/${tw}`);document.getElementById('trendingGrid').innerHTML='';d.results.forEach(i=>document.getElementById('trendingGrid').appendChild(mkCard(i,i.media_type==='tv'?'tv':'movie')));}
 async function loadTrendingGrid(){gsk('trendingGrid',12);const d=await tmdb('/trending/all/week');document.getElementById('trendingGrid').innerHTML='';d.results.forEach(i=>document.getElementById('trendingGrid').appendChild(mkCard(i,i.media_type==='tv'?'tv':'movie')));}
 
-function showSection(name){['homeSection','moviesSection','seriesSection','trendingSection'].forEach(s=>document.getElementById(s).style.display='none');document.getElementById('searchPage').classList.remove('active');document.getElementById('hero').style.display='none';document.getElementById('mainContent').style.display='block';document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));if(name==='home'){document.getElementById('hero').style.display='flex';document.getElementById('homeSection').style.display='block';document.querySelectorAll('.nav-btn')[0].classList.add('active');}else if(name==='movies'){document.getElementById('moviesSection').style.display='block';document.querySelectorAll('.nav-btn')[1].classList.add('active');if(!document.getElementById('moviesGrid').children.length)loadMG(true);}else if(name==='series'){document.getElementById('seriesSection').style.display='block';document.querySelectorAll('.nav-btn')[2].classList.add('active');if(!document.getElementById('seriesGrid').children.length)loadSG(true);}else if(name==='trending'){document.getElementById('trendingSection').style.display='block';document.querySelectorAll('.nav-btn')[3].classList.add('active');if(!document.getElementById('trendingGrid').children.length)loadTrendingGrid();}window.scrollTo({top:0,behavior:'smooth'});}
+// ── WATCHLIST & HISTORY ──
+let currentUserId = null;
+let watchlistCache = new Set();
+
+async function getUserId() {
+  if (currentUserId) return currentUserId;
+  const { data: { session } } = await db.auth.getSession();
+  currentUserId = session?.user?.id;
+  return currentUserId;
+}
+
+async function loadWatchlistCache() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const { data } = await db.from('watchlist').select('tmdb_id,media_type').eq('user_id', uid);
+  watchlistCache = new Set((data||[]).map(r => `${r.tmdb_id}-${r.media_type}`));
+}
+
+async function toggleWatchlist(item, type, btn, e) {
+  e.stopPropagation();
+  const uid = await getUserId();
+  if (!uid) return;
+  const key = `${item.id}-${type}`;
+  if (watchlistCache.has(key)) {
+    await db.from('watchlist').delete().eq('user_id', uid).eq('tmdb_id', item.id).eq('media_type', type);
+    watchlistCache.delete(key);
+    btn.textContent = '🔖';
+    btn.classList.remove('in-list');
+    showToast('Removed from watchlist');
+  } else {
+    await db.from('watchlist').upsert({
+      user_id: uid, tmdb_id: item.id, media_type: type,
+      title: item.title||item.name||'', poster_path: item.poster_path||null,
+      vote_average: item.vote_average||null, release_date: item.release_date||item.first_air_date||null
+    });
+    watchlistCache.add(key);
+    btn.textContent = '❤️';
+    btn.classList.add('in-list');
+    showToast('Added to watchlist!');
+  }
+}
+
+async function addToHistory(item, type, season, episode) {
+  const uid = await getUserId();
+  if (!uid) return;
+  await db.from('watch_history').upsert({
+    user_id: uid, tmdb_id: item.id, media_type: type,
+    title: item.title||item.name||'', poster_path: item.poster_path||null,
+    vote_average: item.vote_average||null, release_date: item.release_date||item.first_air_date||null,
+    season: season||null, episode: episode||null, watched_at: new Date().toISOString()
+  }, { onConflict: 'user_id,tmdb_id,media_type' });
+}
+
+async function loadContinueWatching() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const { data } = await db.from('watch_history').select('*').eq('user_id', uid).eq('media_type', 'tv').order('watched_at', { ascending: false }).limit(10);
+  if (!data || data.length === 0) return;
+  document.getElementById('continueSection').style.display = 'block';
+  const row = document.getElementById('continueRow');
+  row.innerHTML = '';
+  data.forEach(item => {
+    const d = document.createElement('div');
+    d.className = 'continue-card';
+    const thumb = item.poster_path ? `<img class="continue-thumb" src="${IMG}w342${item.poster_path}" alt="${item.title}" loading="lazy"/>` : `<div class="continue-thumb-ph">📺</div>`;
+    d.innerHTML = `${thumb}<div class="continue-play"><svg width="11" height="11" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"/></svg></div><div class="continue-info"><div class="continue-title">${item.title}</div><div class="continue-meta">S${item.season||1} · E${item.episode||1}</div></div>`;
+    d.onclick = () => {
+      const fake = { id: item.tmdb_id, title: item.title, poster_path: item.poster_path, vote_average: item.vote_average };
+      openPlayer(fake, 'tv', item.season||1, item.episode||1);
+    };
+    row.appendChild(d);
+  });
+}
+
+async function loadWatchlistRow() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const { data } = await db.from('watchlist').select('*').eq('user_id', uid).order('added_at', { ascending: false }).limit(10);
+  if (!data || data.length === 0) return;
+  document.getElementById('watchlistSection').style.display = 'block';
+  const row = document.getElementById('watchlistRow');
+  row.innerHTML = '';
+  data.forEach(item => {
+    const fake = { id: item.tmdb_id, title: item.title, poster_path: item.poster_path, vote_average: item.vote_average, release_date: item.release_date };
+    row.appendChild(mkCard(fake, item.media_type));
+  });
+}
+
+async function loadWatchlistPage() {
+  const uid = await getUserId();
+  if (!uid) return;
+  const { data: wl } = await db.from('watchlist').select('*').eq('user_id', uid).order('added_at', { ascending: false });
+  const grid = document.getElementById('watchlistGrid');
+  grid.innerHTML = '';
+  if (!wl || wl.length === 0) { document.getElementById('watchlistEmpty').style.display = 'block'; }
+  else {
+    document.getElementById('watchlistEmpty').style.display = 'none';
+    wl.forEach(item => {
+      const fake = { id: item.tmdb_id, title: item.title, poster_path: item.poster_path, vote_average: item.vote_average, release_date: item.release_date };
+      grid.appendChild(mkCard(fake, item.media_type));
+    });
+  }
+  const { data: hist } = await db.from('watch_history').select('*').eq('user_id', uid).order('watched_at', { ascending: false });
+  const hgrid = document.getElementById('historyGrid');
+  hgrid.innerHTML = '';
+  if (!hist || hist.length === 0) { document.getElementById('historyEmpty').style.display = 'block'; }
+  else {
+    document.getElementById('historyEmpty').style.display = 'none';
+    hist.forEach(item => {
+      const fake = { id: item.tmdb_id, title: item.title, poster_path: item.poster_path, vote_average: item.vote_average, release_date: item.release_date };
+      hgrid.appendChild(mkCard(fake, item.media_type));
+    });
+  }
+}
+
+function showSection(name){['homeSection','moviesSection','seriesSection','trendingSection'].forEach(s=>document.getElementById(s).style.display='none');
+  document.getElementById('searchPage').classList.remove('active');
+  document.getElementById('watchlistPage').style.display='none';
+  document.getElementById('hero').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(name==='home'){document.getElementById('hero').style.display='flex';document.getElementById('homeSection').style.display='block';document.querySelectorAll('.nav-btn')[0].classList.add('active');}
+  else if(name==='movies'){document.getElementById('moviesSection').style.display='block';document.querySelectorAll('.nav-btn')[1].classList.add('active');if(!document.getElementById('moviesGrid').children.length)loadMG(true);}
+  else if(name==='series'){document.getElementById('seriesSection').style.display='block';document.querySelectorAll('.nav-btn')[2].classList.add('active');if(!document.getElementById('seriesGrid').children.length)loadSG(true);}
+  else if(name==='trending'){document.getElementById('trendingSection').style.display='block';document.querySelectorAll('.nav-btn')[3].classList.add('active');if(!document.getElementById('trendingGrid').children.length)loadTrendingGrid();}
+  else if(name==='watchlist'){document.getElementById('mainContent').style.display='none';document.getElementById('watchlistPage').style.display='block';document.querySelectorAll('.nav-btn')[4].classList.add('active');loadWatchlistPage();}
+  window.scrollTo({top:0,behavior:'smooth'});}
 
 function sk(id,n){document.getElementById(id).innerHTML=Array(n).fill(`<div class="sk-card"><div class="sk sk-poster"></div><div class="sk sk-t"></div><div class="sk sk-t2"></div></div>`).join('');}
 function gsk(id,n){document.getElementById(id).innerHTML+=Array(n).fill(`<div class="sk-card"><div class="sk sk-poster"></div><div class="sk sk-t"></div><div class="sk sk-t2"></div></div>`).join('');}
 function renderCards(id,items,type){const el=document.getElementById(id);el.innerHTML='';items.forEach(i=>el.appendChild(mkCard(i,type)));}
 function appendCards(id,items,type){const el=document.getElementById(id);document.querySelectorAll(`#${id} .sk-card`).forEach(s=>s.remove());items.forEach(i=>el.appendChild(mkCard(i,type)));}
 
-function mkCard(item,type){const title=item.title||item.name||'Unknown';const year=(item.release_date||item.first_air_date||'').slice(0,4);const rating=item.vote_average?item.vote_average.toFixed(1):'—';const d=document.createElement('div');d.className='card';d.onclick=()=>openDetail(item,type);if(item.poster_path){d.innerHTML=`<div style="position:relative"><img class="card-poster" src="${IMG}w342${item.poster_path}" alt="${title}" loading="lazy"/><div class="card-rating">★ ${rating}</div><div class="card-overlay"><div class="card-play-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"/></svg></div><div class="card-overlay-title">${title}</div><div class="card-overlay-meta">${year} · ${type==='tv'?'Series':'Movie'}</div></div></div><div class="card-info"><div class="card-title">${title}</div><div class="card-year">${year}</div></div>`;}else{d.innerHTML=`<div style="position:relative"><div class="card-poster-ph">🎬</div><div class="card-rating">★ ${rating}</div></div><div class="card-info"><div class="card-title">${title}</div><div class="card-year">${year}</div></div>`;}return d;}
+function mkCard(item,type){const title=item.title||item.name||'Unknown';const year=(item.release_date||item.first_air_date||'').slice(0,4);const rating=item.vote_average?item.vote_average.toFixed(1):'—';const d=document.createElement('div');d.className='card';d.onclick=()=>openDetail(item,type);
+  const isWL=watchlistCache.has(`${item.id}-${type}`);
+  const wlBtn=`<button class="wl-btn${isWL?' in-list':''}" title="${isWL?'Remove from watchlist':'Add to watchlist'}" onclick="toggleWatchlist({id:${item.id},title:'${title.replace(/'/g,"\'")}',poster_path:'${item.poster_path||''}',vote_average:${item.vote_average||0}},'${type}',this,event)">${isWL?'❤️':'🔖'}</button>`;
+  if(item.poster_path){d.innerHTML=`<div style="position:relative"><img class="card-poster" src="${IMG}w342${item.poster_path}" alt="${title}" loading="lazy"/>${wlBtn}<div class="card-rating">★ ${rating}</div><div class="card-overlay"><div class="card-play-btn"><svg width="11" height="11" viewBox="0 0 24 24" fill="#111"><polygon points="5,3 19,12 5,21"/></svg></div><div class="card-overlay-title">${title}</div><div class="card-overlay-meta">${year} · ${type==='tv'?'Series':'Movie'}</div></div></div><div class="card-info"><div class="card-title">${title}</div><div class="card-year">${year}</div></div>`;}else{d.innerHTML=`<div style="position:relative"><div class="card-poster-ph">🎬</div>${wlBtn}<div class="card-rating">★ ${rating}</div></div><div class="card-info"><div class="card-title">${title}</div><div class="card-year">${year}</div></div>`;}return d;}
 
 // PLAYER
-async function openPlayer(item,type,season=1,episode=1){curItem=item;curType=type;curServer=0;curSeason=season;curEp=episode;curId=item.id;const isTV=type==='tv';document.getElementById('playerModal').classList.add('open');document.body.style.overflow='hidden';document.getElementById('playerTitle').textContent=item.title||item.name||'';document.getElementById('playerSubtitle').textContent=isTV?`Season ${season} · Episode ${episode}`:((item.release_date||'').slice(0,4));document.querySelectorAll('.server-btn').forEach((b,i)=>b.classList.toggle('active',i===0));if(isTV){document.getElementById('playerSidebar').style.display='flex';loadEpSidebar(item.id,season,episode);}else{document.getElementById('playerSidebar').style.display='none';}loadStream(item.id,type,season,episode,0);}
+async function openPlayer(item,type,season=1,episode=1){curItem=item;curType=type;curServer=0;curSeason=season;curEp=episode;curId=item.id;addToHistory(item,type,season,episode);const isTV=type==='tv';document.getElementById('playerModal').classList.add('open');document.body.style.overflow='hidden';document.getElementById('playerTitle').textContent=item.title||item.name||'';document.getElementById('playerSubtitle').textContent=isTV?`Season ${season} · Episode ${episode}`:((item.release_date||'').slice(0,4));document.querySelectorAll('.server-btn').forEach((b,i)=>b.classList.toggle('active',i===0));if(isTV){document.getElementById('playerSidebar').style.display='flex';loadEpSidebar(item.id,season,episode);}else{document.getElementById('playerSidebar').style.display='none';}loadStream(item.id,type,season,episode,0);}
 
 function loadStream(id,type,s,e,srv){const frame=document.getElementById('playerFrame');const loading=document.getElementById('playerLoading');loading.classList.remove('hidden');frame.src='';setTimeout(()=>{const url=type==='tv'?getTVUrl(id,s,e,srv):getMovieUrl(id,srv);frame.src=url;frame.onload=()=>loading.classList.add('hidden');setTimeout(()=>loading.classList.add('hidden'),5000);},300);}
 
