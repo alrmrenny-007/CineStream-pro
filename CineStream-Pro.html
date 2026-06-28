@@ -145,7 +145,19 @@ footer{text-align:center;padding:28px 36px;border-top:1px solid var(--border);co
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @media(max-width:900px){.player-sidebar{display:none}}
-@media(max-width:700px){nav{padding:0 14px}.nav-links{display:none}.hero-content,.section,#searchPage,#apiBanner{padding-left:14px;padding-right:14px}}
+@media(max-width:700px){
+nav{padding:0 12px;gap:8px}
+.nav-links{display:none}
+.search-wrap{width:140px;min-width:0}
+.search-wrap:focus-within{width:160px}
+.hero-content,.section,#searchPage,#apiBanner{padding-left:14px;padding-right:14px}
+.user-menu-wrap{flex-shrink:0}
+.user-avatar{width:32px;height:32px;font-size:11px}
+}
+@media(max-width:400px){
+.search-wrap{width:110px}
+.logo{font-size:20px;letter-spacing:1px}
+}
 
 /* USER MENU */
 .user-menu-wrap{position:relative}
