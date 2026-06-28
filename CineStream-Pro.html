@@ -367,7 +367,7 @@ footer{text-align:center;padding:28px 36px;border-top:1px solid var(--border);co
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const TMDB='https://api.themoviedb.org/3',IMG='https://image.tmdb.org/t/p/';
-let KEY=localStorage.getItem('cs_key')||'';
+let KEY='7a764e96e8fc534ca16ca8095a1070dd';
 let _mg=null,_tg=null,moviePage=1,seriesPage=1;
 let curMT='popular',curTT='popular',mgId=null,tgId=null;
 let curItem=null,curType='movie',curServer=0,curSeason=1,curEp=1,curId=null;
@@ -454,7 +454,7 @@ document.addEventListener('click', e => {
 window.addEventListener('DOMContentLoaded', async ()=>{
   // Guard: check login first
   if (!await checkSession()) return;
-  if(KEY){document.getElementById('apiBanner').classList.add('hidden');initApp();}
+  document.getElementById('apiBanner').classList.add('hidden');initApp();
   document.getElementById('searchInput').addEventListener('input',debounce(handleSearch,500));
   document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))closeDetail();});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){closePlayer();closeDetail();}if(e.key==='/'&&document.activeElement!==document.getElementById('searchInput')){e.preventDefault();document.getElementById('searchInput').focus();}});
